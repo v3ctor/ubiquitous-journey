@@ -67,7 +67,7 @@ generate_queries(size_t nqueries, size_t size) {
 
 void
 test_correctness_all() {
-  constexpr size_t iters{1024}, size{128}, nuniq{16};
+  constexpr size_t iters{1024}, size{256}, nuniq{32};
   rmq::bench::test_correctness<NaiveRmq>(iters, size, nuniq);
   rmq::bench::test_correctness<NaiveFreqTblRmq>(iters, size, nuniq);
   rmq::bench::test_correctness<MoRmqBST>(iters, size, nuniq);
@@ -103,10 +103,10 @@ bench_init_single(size_t size_to, Fn nuniq) {
 
 void
 bench_init_all() {
-  size_t constexpr const_nuniq_val{16};
+  size_t constexpr const_nuniq_val{64};
   auto const const_nuniq{[&](...) { return const_nuniq_val; }};
   auto const sqrt_nuniq{[](auto x) { return roundl(sqrtl(x)); }};
-  auto const lin_nuniq{[](auto x) { return x / 16; }};
+  auto const lin_nuniq{[](auto x) { return x / 64; }};
   size_t const small{1000000}, big{1000000}, med{1000000};
 
   cout << left << setw(40) << setfill(' ') << "\033[32mBENCHMARK INIT\033[0m";
@@ -174,10 +174,10 @@ bench_query_single(size_t size_to, Fn nuniq, BenchQueryOpts opts = {}) {
 
 void
 bench_query_all() {
-  size_t constexpr const_nuniq_val{16};
+  size_t constexpr const_nuniq_val{64};
   auto const const_nuniq{[&](...) { return const_nuniq_val; }};
   auto const sqrt_nuniq{[](auto x) { return roundl(sqrtl(x)); }};
-  auto const lin_nuniq{[](auto x) { return x / 16; }};
+  auto const lin_nuniq{[](auto x) { return x / 64; }};
   size_t const small{100000}, big{4000000}, med{400000};
 
   cout << left << setw(38) << setfill(' ') << "\033[32mBENCHMARK QUERY\033[0m";
