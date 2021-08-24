@@ -72,7 +72,9 @@ count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
 }
 
 CDLMW_SFRmq::CDLMW_SFRmq(vector<ui> const &vals, size_t nuniq)
-    : data_(count_split(vals, nuniq, ceill(sqrtl(vals.size())))),
+    : data_(count_split(vals, nuniq,
+                        ceill(sqrtl(BitArray::traits::bits *
+                                    vals.size())))),
       cdlmw_(data_[0].vals, data_[0].rev_map.size()),
       sf_(data_[1].vals, data_[1].rev_map.size()) {}
 
