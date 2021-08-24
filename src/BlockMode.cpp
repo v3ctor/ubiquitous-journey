@@ -67,8 +67,8 @@ BlockModeUnary::BlockModeUnary(vector<ui> const &vals, size_t nuniq,
     }
 
     // Rank9  -- ~0.25x overhead
-    // Select -- ~1.0x overhead
-    // Total  -- ~2.25x overhead
+    // Select -- ~2.0x overhead
+    // Total  -- ~4.25x overhead
     rank_.push_back(Rank9(blocks_.back()));
     sel0_.push_back(Select<0>(blocks_.back(), rank_.back()));
     sel1_.push_back(Select<1>(blocks_.back(), rank_.back()));
