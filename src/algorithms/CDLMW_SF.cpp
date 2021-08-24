@@ -3,8 +3,6 @@
 
 #include <cmath>
 
-#include <iostream>
-
 namespace rmq {
 inline detail::CountSplitData
 count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
@@ -12,6 +10,25 @@ count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
   size_t greater{0};
   for (auto const val : vals) {
     greater += (++count[val] == threshold + 1);
+  }
+
+  size_t const sf_limit{div_ceil(n, threshold)};
+  // (1) We have more than half SF's slots available and,
+  // (2) We can fill at least half of those slots then:
+  //     Move most frequent elements into SF structure.
+  //     This decreases BP initialization time and overall query time
+  if (greater < sf_limit / 2 && (sf_limit - greater) / 2 < nuniq) {
+    vector<pair<size_t, size_t>> idxs(nuniq);
+    for (size_t i{0}; i < nuniq; ++i) {
+      idxs.first = count[i];
+      idxs.second = i;
+    }
+    sort(idxs.begin(), idxs.end(), greater<pair<size_t, size_t>>());
+    size_t const limit{min(idxs.size(), sf_limit - greater)};
+    for (size_t i{greater}; i < limit; ++i) {
+      count[idxs[i].second] = vals.size() + 1;
+      ++greater;
+    }
   }
 
   detail::CountSplitData data{};
