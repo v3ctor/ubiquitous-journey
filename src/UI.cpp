@@ -36,7 +36,7 @@ void
 ui_sub(ui *dst, ui const *lhs, ui const *rhs, size_t size) {
   // vectorization implemented only for 64bit values ¯\(-_-)/¯, sue me
   if constexpr (sizeof(ui) != 8) {
-    _ui_sub(dst, lhs, rhs, size);
+    ui_sub_slow(dst, lhs, rhs, size);
   } else {
     while (el_align <= size) {
       auto l{_LOAD(lhs)};
