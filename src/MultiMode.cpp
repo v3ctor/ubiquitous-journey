@@ -3,7 +3,8 @@
 #include <assert.h>
 
 namespace rmq {
-MultiModeBST::MultiModeBST(size_t /*size*/, size_t nuniq) : freqTbl_(nuniq) {
+MultiModeBST::MultiModeBST(size_t /*size*/, size_t nuniq)
+    : freqTbl_(nuniq) {
   modeSet_.insert({0, 0});
 }
 
@@ -32,7 +33,8 @@ MultiModeBST::query() const noexcept {
 }
 
 MultiModeList::MultiModeList(size_t size, size_t nuniq)
-    : layers_(size), iters_(nuniq, {0, {}}), nuniq_(nuniq), mfreq_(0) {}
+    : layers_(size), iters_(nuniq, {0, {}}), nuniq_(nuniq),
+      mfreq_(0) {}
 struct layer {
   size_t freq;
   list<ui> vals;

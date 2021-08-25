@@ -3,7 +3,8 @@
 namespace rmq {
 
 KMSRmq::KMSRmq(vector<ui> const &vals, size_t nuniq)
-    : vals_(vals), /*nuniq_(nuniq),*/ bm_(vals, nuniq), fr_(vals, nuniq) {}
+    : vals_(vals), /*nuniq_(nuniq),*/ bm_(vals, nuniq),
+      fr_(vals, nuniq) {}
 
 FreqValue
 KMSRmq::query(size_t first, size_t last) const noexcept {

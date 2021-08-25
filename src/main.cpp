@@ -3,6 +3,7 @@
 static constexpr bool test_correctness{true};
 static constexpr bool test_init{true};
 static constexpr bool test_query{true};
+static constexpr bool test_offline{true};
 
 int
 main() {
@@ -16,6 +17,10 @@ main() {
 
   if constexpr (test_query) {
     rmq::bench::bench_query_all();
+  }
+
+  if constexpr (test_offline) {
+    rmq::bench::bench_offline_all();
   }
 
   return 0;

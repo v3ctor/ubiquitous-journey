@@ -3,7 +3,8 @@
 
 namespace rmq {
 Rank9::Rank9(Rank9::Int const *bits, size_t size)
-    : bits_(bits), blks_(div_ceil<size_t>(size, 8) + (size % 8 == 0)) {
+    : bits_(bits),
+      blks_(div_ceil<size_t>(size, 8) + (size % 8 == 0)) {
   auto bitit{bits_};
   auto blkit{blks_.data()};
   block blk{0, 0};

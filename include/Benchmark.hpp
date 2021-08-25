@@ -15,16 +15,17 @@
 #include <vector>
 
 #ifndef RMQ_BENCH_FIRST_TMPL_NAME
-#  define RMQ_BENCH_FIRST_TMPL_NAME                                            \
-    ({                                                                         \
-      std::string_view view(__PRETTY_FUNCTION__);                              \
-      auto const eq_pos{view.find("=")};                                       \
-      auto const semi_pos{view.find(";", eq_pos)};                             \
-      auto const comma_pos{view.find(",", eq_pos)};                            \
-      auto const brace_pos{view.find("]", eq_pos)};                            \
-      auto const first{eq_pos};                                                \
-      auto const last{std::min(std::min(semi_pos, comma_pos), brace_pos)};     \
-      view.substr(first + 2, last - first - 2);                                \
+#  define RMQ_BENCH_FIRST_TMPL_NAME                                  \
+    ({                                                               \
+      std::string_view view(__PRETTY_FUNCTION__);                    \
+      auto const eq_pos{view.find("=")};                             \
+      auto const semi_pos{view.find(";", eq_pos)};                   \
+      auto const comma_pos{view.find(",", eq_pos)};                  \
+      auto const brace_pos{view.find("]", eq_pos)};                  \
+      auto const first{eq_pos};                                      \
+      auto const last{                                               \
+          std::min(std::min(semi_pos, comma_pos), brace_pos)};       \
+      view.substr(first + 2, last - first - 2);                      \
     })
 #endif
 
@@ -51,7 +52,8 @@ bench_query(size_t size, size_t nuniq, size_t nqueries) {
   using clock = chrono::steady_clock;
   vector<ui> vals(generate_data(size, nuniq));
   vector<MoQuery> queries{generate_queries(nqueries, size)};
-  vector<FreqValue> modes((1 - is_online_algorithm_v<RMQ>)*queries.size());
+  vector<FreqValue> modes(
+      (1 - is_online_algorithm_v<RMQ>)*queries.size());
   rank_space_reduction(vals);
   RMQ rmq(vals, nuniq);
 
@@ -139,15 +141,18 @@ test_correctness(size_t iters, size_t size, size_t nuniq) {
         }
 
         if (rmode.freq > 0 && count[rmode.value] != rmode.freq) {
-          cout << "Value does not match with reported frequency" << endl;
+          cout << "Value does not match with reported frequency"
+               << endl;
           ok = false;
         }
 
         if (!ok) {
           cout << "Class   : " << RMQ_BENCH_FIRST_TMPL_NAME << endl;
           cout << "Query   : " << i << " " << j + 1 << endl;
-          cout << "Reported: " << rmode.freq << " " << rmode.value << endl;
-          cout << "Ex Mode : " << mode.freq << " " << mode.value << endl;
+          cout << "Reported: " << rmode.freq << " " << rmode.value
+               << endl;
+          cout << "Ex Mode : " << mode.freq << " " << mode.value
+               << endl;
           cout << "Vals: " << nuniq << " {";
           for (ui const val : vals) {
             cout << val << ", ";
@@ -160,7 +165,8 @@ test_correctness(size_t iters, size_t size, size_t nuniq) {
   }
 
   auto end{clock::now()};
-  auto ms{chrono::duration_cast<chrono::milliseconds>(end - start).count()};
+  auto ms{chrono::duration_cast<chrono::milliseconds>(end - start)
+              .count()};
 
   cout << "Test " << left << setw(35) << setfill('.')
        << RMQ_BENCH_FIRST_TMPL_NAME << " ok " << ms << "ms" << endl;
@@ -168,6 +174,7 @@ test_correctness(size_t iters, size_t size, size_t nuniq) {
 }
 
 void test_correctness_all();
+void bench_offline_all();
 
 } // namespace rmq::bench
 

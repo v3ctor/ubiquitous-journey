@@ -41,8 +41,8 @@ BlockModeTable::operator()(size_t i, size_t j) const noexcept {
 
 BlockModeUnary::BlockModeUnary(vector<ui> const &vals, size_t nuniq,
                                FrequencyRankTable const &fr)
-    : nuniq(nuniq),
-      bsize(ceill(sqrtl(vals.size()) / sqrtl(BitArray::traits::bits))),
+    : nuniq(nuniq), bsize(ceill(sqrtl(vals.size()) /
+                                sqrtl(BitArray::traits::bits))),
       nblocks(div_ceil(vals.size(), bsize)), vals_(vals), fr_(fr) {
   blocks_.reserve(nblocks);
   rank_.reserve(nblocks);
@@ -91,7 +91,8 @@ BlockModeUnary::operator()(size_t i, size_t j) const noexcept {
   for (size_t k{bl_first}; k < bl_last; ++k) {
     ui const val{vals_[k]};
     size_t const rnk{fr_(k)};
-    if (rnk + 1 >= mode_freq && fr_(val, rnk + 1 - mode_freq) >= first) {
+    if (rnk + 1 >= mode_freq &&
+        fr_(val, rnk + 1 - mode_freq) >= first) {
       return {mode_freq, val};
     }
   }

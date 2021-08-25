@@ -4,12 +4,14 @@ namespace rmq::bench {
 string
 format_nano(chrono::nanoseconds ns) {
   string_view sv[]{"ns", "us", "ms", "s"};
+  string_view cl[]{"\033[94m", "\033[92m", "\033[93m", "\033[91m"};
   size_t sidx{0};
   auto cnt{ns.count()}; // signed, at least 64bit
   for (; cnt >= 10000 && sidx + 1 < sizeof(sv); ++sidx) {
     cnt /= 1000;
   }
-  return to_string(cnt) + string(sv[sidx]);
+  return to_string(cnt) + string(cl[sidx]) + string(sv[sidx]) +
+         "\033[0m";
 }
 
 vector<ui>
@@ -89,14 +91,16 @@ constexpr size_t bench_sizes[]{
 template <typename RMQ, typename Fn>
 void
 bench_init_single(size_t size_to, Fn nuniq) {
-  cout << left << setw(35) << setfill(' ') << RMQ_BENCH_FIRST_TMPL_NAME;
+  cout << left << setw(35) << setfill(' ')
+       << RMQ_BENCH_FIRST_TMPL_NAME;
   for (size_t const size : bench_sizes) {
     if (size > size_to) {
       break;
     }
 
     auto dur{bench_init<RMQ>(size, nuniq(size), 100)};
-    cout << setfill(' ') << setw(9) << format_nano(dur) << " " << flush;
+    cout << setfill(' ') << setw(9 + 9) << right << format_nano(dur)
+         << " " << flush;
   }
   cout << endl;
 }
@@ -107,45 +111,46 @@ bench_init_all() {
   auto const const_nuniq{[&](...) { return const_nuniq_val; }};
   auto const sqrt_nuniq{[](auto x) { return roundl(sqrtl(x)); }};
   auto const lin_nuniq{[](auto x) { return x / 64; }};
-  size_t const small{1000000}, big{1000000}, med{1000000};
+  size_t const size{1000000};
 
-  cout << left << setw(40) << setfill(' ') << "\033[32mBENCHMARK INIT\033[0m";
+  cout << left << setw(35 + 9) << setfill(' ')
+       << "\033[94mBENCH INIT\033[0m";
   for (size_t const size : bench_sizes) {
-    cout << setfill(' ') << setw(9) << size << " " << flush;
+    cout << setfill(' ') << setw(9) << right << size << " " << flush;
   }
   cout << endl;
 
   cout << "--- nuniq is " << const_nuniq_val << endl;
-  bench_init_single<NaiveRmq>(med, const_nuniq);
-  bench_init_single<NaiveFreqTblRmq>(med, const_nuniq);
-  bench_init_single<MoRmqBST>(med, const_nuniq);
-  bench_init_single<MoRmqList>(big, const_nuniq);
-  bench_init_single<CDLMW1Rmq>(big, const_nuniq);
-  bench_init_single<CDLMW2Rmq>(big, const_nuniq);
-  bench_init_single<SFRmq>(big, const_nuniq);
-  bench_init_single<CDLMW_SFRmq>(big, const_nuniq);
+  bench_init_single<NaiveRmq>(size, const_nuniq);
+  bench_init_single<NaiveFreqTblRmq>(size, const_nuniq);
+  bench_init_single<MoRmqBST>(size, const_nuniq);
+  bench_init_single<MoRmqList>(size, const_nuniq);
+  bench_init_single<CDLMW1Rmq>(size, const_nuniq);
+  bench_init_single<CDLMW2Rmq>(size, const_nuniq);
+  bench_init_single<SFRmq>(size, const_nuniq);
+  bench_init_single<CDLMW_SFRmq>(size, const_nuniq);
   cout << endl;
 
   cout << "--- nuniq is sqrt(size)" << endl;
-  bench_init_single<NaiveRmq>(med, sqrt_nuniq);
-  bench_init_single<NaiveFreqTblRmq>(med, sqrt_nuniq);
-  bench_init_single<MoRmqBST>(med, sqrt_nuniq);
-  bench_init_single<MoRmqList>(big, sqrt_nuniq);
-  bench_init_single<CDLMW1Rmq>(big, sqrt_nuniq);
-  bench_init_single<CDLMW2Rmq>(big, sqrt_nuniq);
-  bench_init_single<SFRmq>(big, sqrt_nuniq);
-  bench_init_single<CDLMW_SFRmq>(big, sqrt_nuniq);
+  bench_init_single<NaiveRmq>(size, sqrt_nuniq);
+  bench_init_single<NaiveFreqTblRmq>(size, sqrt_nuniq);
+  bench_init_single<MoRmqBST>(size, sqrt_nuniq);
+  bench_init_single<MoRmqList>(size, sqrt_nuniq);
+  bench_init_single<CDLMW1Rmq>(size, sqrt_nuniq);
+  bench_init_single<CDLMW2Rmq>(size, sqrt_nuniq);
+  bench_init_single<SFRmq>(size, sqrt_nuniq);
+  bench_init_single<CDLMW_SFRmq>(size, sqrt_nuniq);
   cout << endl;
 
   cout << "--- nuniq is linear(size)" << endl;
-  bench_init_single<NaiveRmq>(small, lin_nuniq);
-  bench_init_single<NaiveFreqTblRmq>(med, lin_nuniq);
-  bench_init_single<MoRmqBST>(med, lin_nuniq);
-  bench_init_single<MoRmqList>(med, lin_nuniq);
-  bench_init_single<CDLMW1Rmq>(big, lin_nuniq);
-  bench_init_single<CDLMW2Rmq>(big, lin_nuniq);
-  bench_init_single<SFRmq>(med, lin_nuniq);
-  bench_init_single<CDLMW_SFRmq>(big, lin_nuniq);
+  bench_init_single<NaiveRmq>(size, lin_nuniq);
+  bench_init_single<NaiveFreqTblRmq>(size, lin_nuniq);
+  bench_init_single<MoRmqBST>(size, lin_nuniq);
+  bench_init_single<MoRmqList>(size, lin_nuniq);
+  bench_init_single<CDLMW1Rmq>(size, lin_nuniq);
+  bench_init_single<CDLMW2Rmq>(size, lin_nuniq);
+  bench_init_single<SFRmq>(size, lin_nuniq);
+  bench_init_single<CDLMW_SFRmq>(size, lin_nuniq);
   cout << endl;
 }
 
@@ -156,18 +161,25 @@ struct BenchQueryOpts {
 
 template <typename RMQ, typename Fn>
 void
-bench_query_single(size_t size_to, Fn nuniq, BenchQueryOpts opts = {}) {
-  cout << left << setw(35) << setfill(' ') << RMQ_BENCH_FIRST_TMPL_NAME;
+bench_query_single(size_t size_to, Fn nuniq,
+                   BenchQueryOpts opts = {}) {
+  cout << setw(35) << left << setfill(' ')
+       << RMQ_BENCH_FIRST_TMPL_NAME;
   for (size_t const size : bench_sizes) {
     if (size > size_to) {
       break;
     }
 
     auto const [qfactor, is_linear] = opts;
-    size_t nqueries =
-        is_linear ? size / qfactor : max<size_t>(size, size_t(1e6)) / qfactor;
+    size_t nqueries;
+    if (is_linear) {
+      nqueries = size / qfactor;
+    } else {
+      nqueries = max<size_t>(size, size_t(1e6)) / qfactor;
+    }
     auto const dur{bench_query<RMQ>(size, nuniq(size), nqueries)};
-    cout << setfill(' ') << setw(10) << format_nano(dur) << " " << flush;
+    cout << setfill(' ') << setw(9 + 9) << right << format_nano(dur)
+         << " " << flush;
   }
   cout << endl;
 }
@@ -180,16 +192,17 @@ bench_query_all() {
   auto const lin_nuniq{[](auto x) { return x / 64; }};
   size_t const small{100000}, big{4000000}, med{400000};
 
-  cout << left << setw(38) << setfill(' ') << "\033[32mBENCHMARK QUERY\033[0m";
+  cout << left << setw(35 + 9) << setfill(' ')
+       << "\033[94mBENCH QUERY\033[0m";
   for (size_t const size : bench_sizes) {
-    cout << right << setfill(' ') << setw(10) << size << " " << flush;
+    cout << right << setfill(' ') << setw(9) << size << " " << flush;
   }
   cout << endl;
 
   cout << "--- nuniq is " << const_nuniq_val << endl;
   bench_query_single<NaiveRmq>(med, const_nuniq, {10});
   bench_query_single<NaiveFreqTblRmq>(med, const_nuniq, {10});
-  bench_query_single<MoRmqBST>(med, const_nuniq, {10, true});
+  bench_query_single<MoRmqBST>(med, const_nuniq, {1, true});
   bench_query_single<MoRmqList>(big, const_nuniq, {1, true});
   bench_query_single<CDLMW1Rmq>(big, const_nuniq);
   bench_query_single<CDLMW2Rmq>(big, const_nuniq);
@@ -200,7 +213,7 @@ bench_query_all() {
   cout << "--- nuniq is sqrt(size)" << endl;
   bench_query_single<NaiveRmq>(med, sqrt_nuniq, {10});
   bench_query_single<NaiveFreqTblRmq>(med, sqrt_nuniq, {10});
-  bench_query_single<MoRmqBST>(med, sqrt_nuniq, {10, true});
+  bench_query_single<MoRmqBST>(med, sqrt_nuniq, {1, true});
   bench_query_single<MoRmqList>(big, sqrt_nuniq, {1, true});
   bench_query_single<CDLMW1Rmq>(big, sqrt_nuniq);
   bench_query_single<CDLMW2Rmq>(big, sqrt_nuniq);
@@ -211,12 +224,60 @@ bench_query_all() {
   cout << "--- nuniq is linear(size)" << endl;
   bench_query_single<NaiveRmq>(small, lin_nuniq, {10});
   bench_query_single<NaiveFreqTblRmq>(med, lin_nuniq, {10});
-  bench_query_single<MoRmqBST>(med, lin_nuniq, {10, true});
+  bench_query_single<MoRmqBST>(med, lin_nuniq, {1, true});
   bench_query_single<MoRmqList>(med, lin_nuniq, {1, true});
   bench_query_single<CDLMW1Rmq>(big, lin_nuniq);
   bench_query_single<CDLMW2Rmq>(big, lin_nuniq);
   bench_query_single<SFRmq>(med, lin_nuniq);
   bench_query_single<CDLMW_SFRmq>(big, lin_nuniq);
+  cout << endl;
+}
+
+template <typename RMQ, typename Fn>
+void
+bench_offline_single(size_t size_to, Fn nuniq) {
+  cout << setw(35) << left << setfill(' ')
+       << RMQ_BENCH_FIRST_TMPL_NAME;
+  for (size_t const s : bench_sizes) {
+    if (s > size_to) {
+      break;
+    }
+
+    auto const dur{s * bench_query<RMQ>(size_to, nuniq(s), 2 * s)};
+    cout << setfill(' ') << setw(9 + 9) << right << format_nano(dur)
+         << " " << flush;
+  }
+  cout << endl;
+}
+
+void
+bench_offline_all() {
+  cout << left << setw(35 + 9) << setfill(' ')
+       << "\033[94mBENCH OFFLINE\033[0m";
+  for (size_t const size : bench_sizes) {
+    cout << right << setfill(' ') << setw(9) << size << " " << flush;
+  }
+  cout << endl;
+
+  size_t constexpr const_nuniq_val{64};
+  auto const const_nuniq{[&](...) { return const_nuniq_val; }};
+  auto const sqrt_nuniq{[](auto x) { return roundl(sqrtl(x)); }};
+  auto const lin_nuniq{[](auto x) { return x / 64; }};
+
+  size_t const size{400000};
+  cout << "--- nuniq is " << const_nuniq_val << endl;
+  bench_offline_single<MoRmqBST>(size, const_nuniq);
+  bench_offline_single<MoRmqList>(size, const_nuniq);
+  cout << endl;
+
+  cout << "--- nuniq is " << const_nuniq_val << endl;
+  bench_offline_single<MoRmqBST>(size, sqrt_nuniq);
+  bench_offline_single<MoRmqList>(size, sqrt_nuniq);
+  cout << endl;
+
+  cout << "--- nuniq is " << const_nuniq_val << endl;
+  bench_offline_single<MoRmqBST>(size, lin_nuniq);
+  bench_offline_single<MoRmqList>(size, lin_nuniq);
   cout << endl;
 }
 } // namespace rmq::bench

@@ -12,7 +12,8 @@ struct FrequencyTable {
   FrequencyTable(vector<ui> const &vals, size_t nuniq);
 
   size_t operator()(ui val, size_t k) const noexcept;
-  size_t getNumOccurances(ui val, size_t first, size_t last) const noexcept;
+  size_t getNumOccurances(ui val, size_t first,
+                          size_t last) const noexcept;
   size_t size(ui val) const noexcept;
 
 private:

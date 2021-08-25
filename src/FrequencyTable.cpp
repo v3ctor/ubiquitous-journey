@@ -45,7 +45,8 @@ FrequencyTable::size(ui val) const noexcept {
   return count_[val];
 }
 
-FrequencyRankTable::FrequencyRankTable(vector<ui> const &vals, size_t nuniq)
+FrequencyRankTable::FrequencyRankTable(vector<ui> const &vals,
+                                       size_t nuniq)
     : FrequencyTable(vals, nuniq), rank_(vals.size()) {
   for (size_t i{0}; i < nuniq; ++i) {
     size_t const len{size(i)};

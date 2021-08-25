@@ -10,7 +10,9 @@ BitArray::ref::operator=(bool b) noexcept {
   return *this;
 }
 
-BitArray::ref::operator bool() const noexcept { return *ptr >> off & 1; }
+BitArray::ref::operator bool() const noexcept {
+  return *ptr >> off & 1;
+}
 
 BitArray::BitArray(size_t nbits)
     : nbits_(nbits), mem_(div_ceil(nbits_, traits::bits)) {}
@@ -91,8 +93,10 @@ make_delimiter_ba(BitArray const &ba) {
   return make_delimiter_ba<Bit>(ba, nones);
 }
 
-template BitArray make_delimiter_ba<false>(BitArray const &ba, size_t nones);
-template BitArray make_delimiter_ba<true>(BitArray const &ba, size_t nones);
+template BitArray make_delimiter_ba<false>(BitArray const &ba,
+                                           size_t nones);
+template BitArray make_delimiter_ba<true>(BitArray const &ba,
+                                          size_t nones);
 template BitArray make_delimiter_ba<false>(BitArray const &ba);
 template BitArray make_delimiter_ba<true>(BitArray const &ba);
 

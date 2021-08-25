@@ -15,7 +15,8 @@ using namespace std;
 struct OfflineAlgorithm {};
 
 template <typename T>
-constexpr bool is_online_algorithm_v{!is_base_of_v<OfflineAlgorithm, T>};
+constexpr bool is_online_algorithm_v{
+    !is_base_of_v<OfflineAlgorithm, T>};
 
 // for benchmarking purposses
 struct EmptyRmq {

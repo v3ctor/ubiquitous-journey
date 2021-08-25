@@ -12,8 +12,10 @@ MoRmq<MultiMode>::MoRmq(vector<ui> const &vals, size_t nuniq)
 
 template <typename MultiMode>
 void
-MoRmq<MultiMode>::query(vector<MoQuery> &&queries, vector<FreqValue> &results) {
-  long double const _bsize{log2l(vals_.size() / sqrtl(queries.size()))};
+MoRmq<MultiMode>::query(vector<MoQuery> &&queries,
+                        vector<FreqValue> &results) {
+  long double const _bsize{
+      log2l(vals_.size() / sqrtl(queries.size()))};
   size_t const bsize{max<size_t>(1, floor(_bsize))};
 
   sort(queries.begin(), queries.end(),

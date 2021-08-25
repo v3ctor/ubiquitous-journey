@@ -4,7 +4,8 @@
 namespace rmq {
 template <typename BlockMode>
 CDLMWRmq<BlockMode>::CDLMWRmq(vector<ui> const &vals, size_t nuniq)
-    : vals_(vals), nuniq_(nuniq), fr_(vals, nuniq), bm_(vals, nuniq, fr_) {}
+    : vals_(vals), nuniq_(nuniq), fr_(vals, nuniq),
+      bm_(vals, nuniq, fr_) {}
 template <typename BlockMode>
 
 FreqValue

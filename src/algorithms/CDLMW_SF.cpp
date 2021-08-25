@@ -1,6 +1,8 @@
 #include "Algorithms.hpp"
+#include "Math.hpp"
 #include "RSReduction.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace rmq {
@@ -12,18 +14,19 @@ count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
     greater += (++count[val] == threshold + 1);
   }
 
-  size_t const sf_limit{div_ceil(n, threshold)};
+  size_t const sf_limit{div_ceil(vals.size(), threshold)};
   // (1) We have more than half SF's slots available and,
   // (2) We can fill at least half of those slots then:
   //     Move most frequent elements into SF structure.
   //     This decreases BP initialization time and overall query time
   if (greater < sf_limit / 2 && (sf_limit - greater) / 2 < nuniq) {
-    vector<pair<size_t, size_t>> idxs(nuniq);
+    using pair = pair<size_t, size_t>;
+    vector<pair> idxs(nuniq);
     for (size_t i{0}; i < nuniq; ++i) {
-      idxs.first = count[i];
-      idxs.second = i;
+      idxs[i].first = count[i];
+      idxs[i].second = i;
     }
-    sort(idxs.begin(), idxs.end(), greater<pair<size_t, size_t>>());
+    sort(idxs.begin(), idxs.end(), std::greater<pair>());
     size_t const limit{min(idxs.size(), sf_limit - greater)};
     for (size_t i{greater}; i < limit; ++i) {
       count[idxs[i].second] = vals.size() + 1;
@@ -72,9 +75,9 @@ count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
 }
 
 CDLMW_SFRmq::CDLMW_SFRmq(vector<ui> const &vals, size_t nuniq)
-    : data_(count_split(vals, nuniq,
-                        ceill(sqrtl(BitArray::traits::bits *
-                                    vals.size())))),
+    : data_(count_split(
+          vals, nuniq,
+          ceill(sqrtl(BitArray::traits::bits * vals.size())))),
       cdlmw_(data_[0].vals, data_[0].rev_map.size()),
       sf_(data_[1].vals, data_[1].rev_map.size()) {}
 

@@ -9,7 +9,8 @@ namespace rmq {
 
 SFRmq::SFRmq(vector<ui> const &vals, size_t nuniq)
     : vals_(vals), nuniq_(nuniq),
-      sf_mem_((1 + div_ceil(vals.size(), nuniq)) * nuniq), sf_(sf_mem_.data()) {
+      sf_mem_((1 + div_ceil(vals.size(), nuniq)) * nuniq),
+      sf_(sf_mem_.data()) {
   auto sf_it{sf_ + nuniq};
   for (size_t i{0}; i < vals.size(); sf_it += nuniq) {
     copy(sf_it - nuniq, sf_it, sf_it);
