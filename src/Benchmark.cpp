@@ -270,12 +270,12 @@ bench_offline_all() {
   bench_offline_single<MoRmqList>(size, const_nuniq);
   cout << endl;
 
-  cout << "--- nuniq is " << const_nuniq_val << endl;
+  cout << "--- nuniq is sqrt(size)" << endl;
   bench_offline_single<MoRmqBST>(size, sqrt_nuniq);
   bench_offline_single<MoRmqList>(size, sqrt_nuniq);
   cout << endl;
 
-  cout << "--- nuniq is " << const_nuniq_val << endl;
+  cout << "--- nuniq is linear(size)" << endl;
   bench_offline_single<MoRmqBST>(size, lin_nuniq);
   bench_offline_single<MoRmqList>(size, lin_nuniq);
   cout << endl;

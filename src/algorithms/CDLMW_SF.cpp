@@ -9,25 +9,9 @@ namespace rmq {
 inline detail::CountSplitData
 count_split(vector<ui> const &vals, size_t nuniq, size_t threshold) {
   vector<size_t> count(nuniq);
-  for (auto const val : vals) {
-    ++count[val];
-  }
-
   size_t greater{0};
-  {
-    using pair = pair<size_t, size_t>;
-    vector<pair> idxs(nuniq);
-    for (size_t i{0}; i < nuniq; ++i) {
-      idxs[i].first = count[i];
-      idxs[i].second = i;
-    }
-    sort(idxs.begin(), idxs.end(), std::greater<pair>());
-    size_t const sf_limit{div_ceil(vals.size(), threshold)};
-    size_t const limit{min(idxs.size(), sf_limit)};
-    for (size_t i{0}; i < limit; ++i) {
-      count[idxs[i].second] = vals.size() + 1;
-      ++greater;
-    }
+  for (auto const val : vals) {
+    greater += (++count[val] == threshold + 1);
   }
 
   detail::CountSplitData data{};
