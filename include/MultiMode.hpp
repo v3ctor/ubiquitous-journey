@@ -32,7 +32,7 @@ struct MultiModeList {
   void remove(ui val) noexcept;
   FreqValue query() const noexcept;
 
-  // private:
+private:
   vector<list<ui>> layers_;
   vector<iter> iters_;
   size_t const nuniq_;

@@ -94,7 +94,7 @@ struct SFRmq {
   SFRmq(vector<ui> const &vals, size_t nuniq);
   FreqValue query(size_t first, size_t last) const;
 
-  // private:
+private:
   vector<ui> const &vals_;
   size_t const nuniq_;
   vector<size_t> sf_mem_;
