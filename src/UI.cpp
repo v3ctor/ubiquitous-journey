@@ -2,8 +2,7 @@
 
 #include <cassert>
 #include <immintrin.h>
-#include <iostream>
-using namespace std;
+
 namespace rmq {
 namespace {
 #ifdef __AVX512F__
