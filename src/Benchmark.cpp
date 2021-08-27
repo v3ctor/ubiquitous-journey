@@ -125,6 +125,7 @@ bench_init_all() {
   bench_init_single<NaiveFreqTblRmq>(size, const_nuniq);
   bench_init_single<MoRmqBST>(size, const_nuniq);
   bench_init_single<MoRmqList>(size, const_nuniq);
+  bench_init_single<KMSRmq>(size, const_nuniq);
   bench_init_single<CDLMW1Rmq>(size, const_nuniq);
   bench_init_single<CDLMW2Rmq>(size, const_nuniq);
   bench_init_single<SFRmq>(size, const_nuniq);
@@ -136,6 +137,7 @@ bench_init_all() {
   bench_init_single<NaiveFreqTblRmq>(size, sqrt_nuniq);
   bench_init_single<MoRmqBST>(size, sqrt_nuniq);
   bench_init_single<MoRmqList>(size, sqrt_nuniq);
+  bench_init_single<KMSRmq>(size, const_nuniq);
   bench_init_single<CDLMW1Rmq>(size, sqrt_nuniq);
   bench_init_single<CDLMW2Rmq>(size, sqrt_nuniq);
   bench_init_single<SFRmq>(size, sqrt_nuniq);
@@ -147,6 +149,7 @@ bench_init_all() {
   bench_init_single<NaiveFreqTblRmq>(size, lin_nuniq);
   bench_init_single<MoRmqBST>(size, lin_nuniq);
   bench_init_single<MoRmqList>(size, lin_nuniq);
+  bench_init_single<KMSRmq>(size, const_nuniq);
   bench_init_single<CDLMW1Rmq>(size, lin_nuniq);
   bench_init_single<CDLMW2Rmq>(size, lin_nuniq);
   bench_init_single<SFRmq>(size, lin_nuniq);
@@ -156,7 +159,7 @@ bench_init_all() {
 
 struct BenchQueryOpts {
   size_t qfactor{1};
-  bool always_liear{false};
+  bool always_linear{false};
 };
 
 template <typename RMQ, typename Fn>
@@ -204,6 +207,7 @@ bench_query_all() {
   bench_query_single<NaiveFreqTblRmq>(med, const_nuniq, {10});
   bench_query_single<MoRmqBST>(med, const_nuniq, {1, true});
   bench_query_single<MoRmqList>(big, const_nuniq, {1, true});
+  bench_query_single<KMSRmq>(big, const_nuniq);
   bench_query_single<CDLMW1Rmq>(big, const_nuniq);
   bench_query_single<CDLMW2Rmq>(big, const_nuniq);
   bench_query_single<SFRmq>(big, const_nuniq);
@@ -215,6 +219,7 @@ bench_query_all() {
   bench_query_single<NaiveFreqTblRmq>(med, sqrt_nuniq, {10});
   bench_query_single<MoRmqBST>(med, sqrt_nuniq, {1, true});
   bench_query_single<MoRmqList>(big, sqrt_nuniq, {1, true});
+  bench_query_single<KMSRmq>(big, sqrt_nuniq);
   bench_query_single<CDLMW1Rmq>(big, sqrt_nuniq);
   bench_query_single<CDLMW2Rmq>(big, sqrt_nuniq);
   bench_query_single<SFRmq>(big, sqrt_nuniq);
@@ -226,6 +231,7 @@ bench_query_all() {
   bench_query_single<NaiveFreqTblRmq>(med, lin_nuniq, {10});
   bench_query_single<MoRmqBST>(med, lin_nuniq, {1, true});
   bench_query_single<MoRmqList>(med, lin_nuniq, {1, true});
+  bench_query_single<KMSRmq>(big, lin_nuniq);
   bench_query_single<CDLMW1Rmq>(big, lin_nuniq);
   bench_query_single<CDLMW2Rmq>(big, lin_nuniq);
   bench_query_single<SFRmq>(med, lin_nuniq);
