@@ -7,7 +7,7 @@ format_nano(chrono::nanoseconds ns) {
   string_view cl[]{"\033[94m", "\033[92m", "\033[93m", "\033[91m"};
   size_t sidx{0};
   auto cnt{ns.count()}; // signed, at least 64bit
-  for (; cnt >= 10000 && sidx + 1 < sizeof(sv); ++sidx) {
+  for (; cnt >= 10000 && sidx + 1 < 4; ++sidx) {
     cnt /= 1000;
   }
   return to_string(cnt) + string(cl[sidx]) + string(sv[sidx]) +
