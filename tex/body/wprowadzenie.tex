@@ -1,0 +1,57 @@
+\section{Wprowadzenie}
+\subsection{Wstęp}
+W problemie \textsc{Range Mode Query}, albo w skrócie \textsc{RMQ}, dana jest na wejściu $n$-elementowa tablica liczb naturalnych $A$ oraz $q$ przedziałów tablicy $A$. Dla każdego danego na wejściu przedziału chcemy policzyć jego dominantę, czyli element który najczęściej występuje na danym fragmencie.
+
+Łatwo zaproponować rozwiązanie naiwne działające w czasie liniowym od długości przedziału. Pierwsze usprawnienie względem algorytmu naiwnego zostało zaproponowane przez Krizanc i innych w 2005 roku w pracy \cite{kriz05}. Autorzy pokazali deterministyczny algorytm rozwiązujący problem \textsc{RMQ} w czasie $\Oh(n^e \log n)$ oraz czasie inicjalizacji $\Oh(n^{2-2e})$, gdzie $e \in (0, 1/2]$.
+
+W 2014 roku Timothy M. Chan i inni w pracy \cite{chan14} pokazali warunkowe ograniczenie dolne dla problemu \textsc{RMQ} za pomocą redukcji z mnożenia macierzy boolowskich. Każdy algorytm rozwiązujący problem \textsc{RMQ} ma czas inicjalizacji $\Omega(n^{\omega/2})$ lub czas zapytania $\Omega(n^{\omega/2-1})$, gdzie $\omega$ to wykładnik algorytmu mnożenia macierzy. Obecnie nie jest znany algorytm kombinatoryczny mnożenia macierzy boolowskich, który działałby w czasie $\Oh(n^{3-\epsilon})$, co oznacza, że przy obecnym stanie wiedzy nie potrafimy rozwiązać problemu \textsc{RMQ} w czasie inicjalizacji $\Oh(n^{3/2-\epsilon})$ oraz czasie zapytania $\Oh(n^{1/2-\epsilon})$ przy użyciu czysto kombinatorycznych technik.
+
+W tej samej pracy autorzy zaproponowali algorytm o czasie zapytania $\Oh(\sqrt n)$ oraz czasie inicjalizacji $\Oh(n\sqrt{n})$. Później pokazali jego usprawnienie w standardowym modelu \textsc{RAM}, o czasie zapytania $\Oh(\sqrt{n/w})$ oraz czasie inicjalizacji $\Oh(n\sqrt{nw})$, gdzie $w$ oznacza długość słowa maszynowego. Oba algorytmy zużywają liniową pamięć.
+
+Celem tej pracy jest opis, implementacja i analiza porównawcza wyżej wymienionych algorytmów i struktur danych dla problemu \textsc{RMQ}. W szczególności zajmujemy się tylko algorytmami, które zużywają liniową pamięć. W rozdziale \ref{sec:naive} prezentujemy algorytm naiwny w dwóch wariantach, a następnie w rozdziale \ref{sec:offline} pokazujemy prosty algorytm offline bazujący na algorytmie naiwnym. Następnie przechodzimy do prezentacji algorytmów z prac wspomnianych powyżej, zaczynając od algorytmu \cite{kriz05} w rozdziale \ref{sec:kms}. Następne 4 rozdziały poświęcone są pracy \cite{chan14}, w rozdziale \ref{sec:cdlmw} pokazujemy strukturę danych odpowiadającą na zapytanie \textsc{RMQ} w czasie $\Oh(\sqrt{n})$, a w rozdziale \ref{sec:cdlmw-bp} przedstawiamy jej usprawnienie działające w modelu \textsc{RAM}. Następnie pokazujemy w rozdziale \ref{sec:sf} prostą strukturę danych, której czas zapytania uzależniony jest od liczby unikalnych elementów tablicy $A$. W rozdziale \ref{sec:cdlmw-bp-sf} pokazujemy strukturę danych będącą połączeniem struktur opisanych w rozdziałach \ref{sec:cdlmw-bp} oraz \ref{sec:sf}. Na końcu w rozdziale \ref{sec:exp} prezentujemy wyniki ewaluacji naszych implementacji powyższych algorytmów i struktur danych. Wszystkie implementacje są dostępne pod linkiem \url{https://github.com/v3ctor/ubiquitous-journey/tree/master/code}.
+
+% intuicyjnie o tym, czym jest Range Mode Query
+% czy się do czegoś przydaje w praktyce (pewnie nie bardzo ;), to wtedy pomijamy)
+% kto go rozważał w literaturze (tak, to będzie powtórzone później, ale tutaj trzeba zaznaczyć, jakie algorytmy są i jak się różnią złożonością)
+% co ma na celu ta praca - czyli głównie implementację, testy i porównanie - oraz jak będzie wyglądała (“W rozdziale 2 robimy to-a-to, a potem w rozdziale 3…”)
+
+
+\subsection{Terminologia i notacja}
+\paragraph{Tablice} Przez $A[1:n]$ będziemy oznaczali tablicę $n$-elementową $A$ indeksowaną od 1, a przez $A[k]$ $k$-ty jej element. Podobnie będziemy oznaczać spójny fragment tablicy A od $i$-tego do $j$-tego elementu włącznie przez $A[i:j]$ dla $i \le j$. Gdy $i > j$, $A[i:j]$ oznacza pusty fragment. Dla przedziału $A[i:j]$, indeks $i$ będziemy nazywać \emph{lewym końcem przedziału}, a $j$ \emph{prawym końcem przedziału}. % Czasem będziemy nadużywać notacji i sumować fragmenty tablic, mamy tutaj na myśli sumę w sensie multizbiorów.\vspace{-0.5em}
+\paragraph{Częstotliwość} Dla tablicy $A$, przez $F_x^A(i,j)$ oznaczamy \emph{częstotliwość} liczby $x$ na przedziale $A[i:j]$, to znaczy liczbę elementów $A[k]$ równych $x$ dla $k\in\{i, i+1, \dots, j\}$. Formalnie $F_x^A(i, j) = $\\$|\{k\ |\ A[k] = x \land k \in \{i, i+1, \dots, j\}\}|$. Ponadto definiujemy przez $F^A(i,j) = \max_{k \in \{A[i], A[i+1], \dots, A[j]\}}\{F^A_k(i,j)\}$. Zamiast \emph{częstotliwość} będziemy też wymiennie używać nazwy \emph{liczba wystąpień}.\vspace{-0.5em}
+%Analogicznie definiujemy częstotliwość dla multizbiorów i zbiorów.
+\paragraph{Dominanta} Element $A[k]$ tablicy $A[1:n]$ nazwiemy \emph{dominantą}, jeżeli $F^A_{A[k]}(1,n) = F^A(1,n)$, innymi słowy $A[k]$ jest dominantą, gdy jest elementem maksymalnym pod względem częstotliwości w tablicy $A$. Analogicznie definiujemy dominanty na przedziałach tablic.
+
+\paragraph{Nazwy struktur danych} W przypadku, gdy struktura danych nie jest nazwana w pracy odnosimy się do niej poprzez inicjały autorów pracy. Ponadto część struktur jest parametryzowana liczbą od której to zależy jej złożoność pamięciowa lub czasowa. Dla przykładu struktura $CDLMW(s)$ jest parametryzowana liczbą $s$.
+
+\paragraph{} \hspace{-1em}
+Od tego momentu będziemy przez cały czas używać nazwy $A$ na określenie tablicę wejściowej dla algorytmów i struktur danych. Ponadto oznaczamy przez $\dt$ liczbę unikalnych elementów w tablicy $A$.\vspace{-0.5em}
+\subsection{Redukcja Rank Space}
+Niech $D(x)$ oznacza zbiór elementów tablicy $A[1:n]$ w przedziale $A[1:x]$. Tablicę $B[1:n]$ nazwiemy \emph{rank-space-redukcją}, albo w skrócie \emph{redukcją} tablicy $A$, gdy istnieje pewna bijekcja $f: D(n) \rightarrow \{1, 2, \dots, |D(n)|\}$ taka, że $B[i] = f(A[i])$ dla każdego $i \in \{1,2,\dots,n\}$. Pracując na tablicy zredukowanej można efektywniej wykonać na niej pewne operacje w porównaniu do tablicy niezredukowanej. Dlatego przy omawianiu większości algorytmów w tej pracy będziemy zakładać, że tablica na której pracujemy jest w tej postaci. Gdy nie będziemy wymagać, aby tablica była zredukowana napiszemy o tym explicite.
+W praktyce nie możemy założyć, że podana tablica na wejściu jest zredukowana dlatego podajemy liniowy, randomizowany algorytm konwersji tablicy $A[1:n]$ do jej zredukowanej postaci.
+\begin{algorithm}[H]
+    \caption{Randomizowany algorytm rank-space-redukcji}
+    \label{alg:rank space reduction}
+    \begin{algorithmic}[1]
+        \Function{RankSpaceReduction}{$A[1:n]$}
+            \State Niech $B[1:n]$ to tablica $n$-elementowa
+            \State uniq $\gets$ HashMap()
+            \For{$k \gets 1,\dots,n$}
+                \If{uniq.contains($A[i])$}
+                    \State $B \gets$ uniq.get($A[i]$)
+                \Else
+                    \State $B \gets$ uniq.size()+1
+                    \State uniq.insert($A[i]$, uniq.size()+1)
+              \EndIf
+            \EndFor
+            \Return $B$, uniq
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\hspace{-1.66em}Utrzymujemy dwa niezmienniki na końcu pętli:\vspace{-0.60em}
+\begin{enumerate}
+    \item $uniq$ reprezentuje bijekcję ze zbioru $D(k)$ do $\{1, 2, \dots, |D(k)|\}$.\vspace{-0.60em}
+    \item $B[1:k]$ jest redukcją $A[1:k]$ powstałą przez aplikacje bijekcji $uniq$ do każdego elementu.
+\end{enumerate}
+Na końcu zwracamy zredukowaną tablicę $B$ oraz hash-mapę $uniq$ która po odwróceniu kluczy z wartościami pozwoli na odtworzenie tablicy wejściowej $A$.
+\newpage

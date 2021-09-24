@@ -1,0 +1,147 @@
+\section{Algorytm Offline}
+\label{sec:offline}
+Najpierw wprowadzimy strukturę danych \textsc{MultiMode}, która umożliwi nam dla tablicy $A$ obliczenie dominanty $A[k:l]$ z dominanty $A[i:j]$ w czasie $\Oh( \left(|k-i| + |l-j|\right) \log n)$. Następnie pokażemy algorytm\footnote{Podany algorytm jest czasem nazywany “rozbiciem pierwiastkowym”, albo “algorytmem Mo”} używający tej struktury danych, aby obsłużyć zbiór zapytań o dominanty $Q=\{Q_1, Q_2, \dots, Q_q\}$ w czasie $\Oh(n\sqrt{q}\log n)$, gdzie $q = |Q|$.
+\subsection{Struktura \textsc{MultiMode}}
+Pokażemy strukturę danych \textsc{MultiMode}, która będzie utrzymywać pewien multizbiór $M$ i wspierać na nim operacje:
+\begin{itemize}[nosep]
+    \item \textsc{insert}(x) -- wstaw $x$ do multizbioru $M$
+    \item \textsc{remove}(x) -- usuń $x$ z multizbioru $M$
+    \item \textsc{query}() -- zwróć dominantę i jej częstotliwość
+\end{itemize}
+Wszystkie operacje działają w czasie $\Oh(\log n)$, ponadto możemy zbudować strukturę \textsc{MultiMode} w $\Oh(1)$ czasu.
+Struktura danych będzie reprezentować multizbiór $M$ przez hash-mapę $count$ oraz binarne drzewo wyszukiwań $freqval$. Hash-mapa $count$ przyporządkowuje każdemu unikalnemu elementowi $M$ jego liczbę wystąpień. Binarne drzewo $freqval$ zawiera pary $(count[v], v)$ uporządkowane po $count[v]$ dla każdego klucza $v$ hash-mapy $count$. Dzięki $freqval$ będziemy w stanie zapytać o klucz hash-mapy $count$ o maksymalnej wartości, co pozwoli nam na zwrócenie dominanty w czasie $\Oh(\log n)$.\\
+\begin{minipage}[t]{0.52\textwidth}
+\begin{algorithm}[H]
+    \caption{Operacja \textsc{insert}}
+    \label{alg:offline-insert}
+    \begin{algorithmic}[1]
+        \Function{insert}{$x$}
+            \State freq $\gets 0$
+            \If{count.contains($A[x]$)}
+                \State freq $\gets$ count.get($A[x]$)
+                \State freqval.remove((freq, $A[x]$))
+            \EndIf
+            \State freq $\gets$ freq$ + 1$
+            \State freqval.insert((freq, $A[x]$))
+            \State count[$A[x]$] = freq
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\vspace{0.5em}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.47\textwidth}
+\begin{algorithm}[H]
+    \caption{Operacja \textsc{remove}}
+    \label{alg:offline-remove}
+    \begin{algorithmic}[1]
+        \Function{remove}{$x$}
+            \State freq $\gets$ count.get($A[x]$)
+            \State freqval.remove((freq, $A[x]$))
+            \State freq $\gets$ freq $ - 1$
+            \If{freq $\ne 0$}
+                \State freqval.insert((freq, $A[x]$))
+            \EndIf
+            \State count[$A[x]$] = freq
+        \EndFunction
+        \vspace{1.2em}
+    \end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\begin{algorithm}[H]
+    \caption{Operacja \textsc{query}}
+    \label{alg:offline-query}
+    \begin{algorithmic}[1]
+        \Function{query}{$x$}
+            \If{freqval.size() $=$ 0}
+                \State \Return $(0,0)$
+            \EndIf
+            \Return freqval.max()
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\paragraph{Operacja \textsc{insert}}
+Gdy dodajemy element $x$ do multizbioru $M$ liczba jego wystąpień zwiększa się o 1, zatem musimy zwiększyć wartość $x$ w hash-mapie $count$, robimy to w linijce 8. Po zaktualizowaniu $count$ musimy poprawić BST $freqval$ tak, aby odpowiadało zmienionej hash-mapie $count$. Jeżeli element $x$ należał wcześniej do multizbioru $M$ to musimy usunąć starą parę w $freqval$ i wstawić nową, robimy to odpowiednio w linijkach 5 oraz 7. W drugim przypadku, gdy x jest nowym unikalnym elementem $M$ wystarczy tylko wstawić nową parę do $freqval$, robimy to w linijce 7.
+
+\paragraph{Operacja \textsc{remove}}
+Zakładamy. że chcemy usunąć już istniejącą wartość $x$ z multizbioru $M$ dlatego nie rozważamy przypadku, gdy $x$ nie należy do $M$. Operacja \textsc{remove} jest analogiczna w implementacji do operacji \textsc{insert}.
+
+\paragraph{Operacja \textsc{query}}
+Jeżeli $M$ jest pusty to zwracamy parę (0, 0), gdzie pierwszy element reprezentuje liczbę wstąpień, a drugi dominantę. W przeciwnym wypadku zwracamy największy element znajdujący się w BST $freqval$.
+
+\paragraph{Transformacja przedziałów}
+\begin{algorithm}[H]
+    \caption{\textsc{transform}}
+    \label{alg:offline-transform}
+    \begin{algorithmic}[1]
+        \Function{transform}{$mm$,$i$,$j$,$k$,$l$}
+            \While{$j < l$}
+                \State $mm.insert(j+1)$
+                \State $j \gets j+1$
+            \EndWhile
+            \While{$i < k$}
+                \State $mm.remove(i)$
+                \State i $\gets$ i+1
+            \EndWhile
+            \While{$i > k$}
+                \State $mm.insert(i-1)$
+                \State $i \gets i-1$
+            \EndWhile
+            \While{$j > l$}
+                \State $mm.remove(j)$
+                \State $j \gets j-1$
+            \EndWhile
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+Załóżmy, że używamy struktury \textsc{MultiMode}, aby reprezentować spójny przedział tablicy $A[i:j]$. Możemy zamienić reprezentowany przedział $A[i:j]$ na dowolny inny $A[k:l]$ odpowiednio wywołując operacje \textsc{insert} oraz \textsc{remove}. Robimy to w taki sposób, aby w każdym kroku struktura \textsc{MultiMode} reprezentowała spójny przedział tablicy $A$. Dla przykładu gdy $j < l$ wywołujemy po kolei \textsc{insert}(x) dla $x=i+1,i+2,\dots,l$, Robimy to w linijkach 2--4. Pozostałe 3 przypadki obsługujemy analogicznie.
+
+\paragraph{Alternatywna implementacja \textsc{MultiMode}} Alternatywnie multizbiór $M$ można utrzymywać poprzez tablicę $G[1:n]$ list, gdzie $G[i]$ przechowuje w liście wszystkie unikalne elementy o częstotliwości $i$. Operację \textsc{insert}(x) można zrealizować w czasie stałym, poprzez przepięcie elementu do następnej listy, analogicznie można obsłużyć operację \textsc{remove}. Przy realizacji obu operacji utrzymujemy największy indeks niepustej listy, co pozwala nam na obsługę \textsc{query} w czasie stałym. Ponadto, aby znaleźć odpowiadającą listę elementu $x$ spamiętujemy dla każdego unikalnego elementu w której jest liście w tablicy lub hash-mapie. Nazywamy tą wersję \textsc{MultiModeLIST}, a oryginalną \textsc{MultiModeBST}.
+
+
+\subsection{Konstrukcja}
+Algorytm offline nie wymaga żadnego przetwarzania wstępnego.
+
+\subsection{Algorytm zapytania}
+\begin{algorithm}[H]
+    \caption{\textsc{Algorytm zapytania offline}}
+    \label{alg:offline-qry}
+    \begin{algorithmic}[1]
+        \Function{OfflineQuery}{$Q$}
+            \State \small{Niech $modes$ to tablica $q$-elementowa.}
+            \State \small{Niech $U$ to ciąg zapytań z zbioru $Q$ w porządku zdefiniowanym poniżej.}
+            \State $mm \gets MultiMode()$
+            \State $i \gets 0$
+            \State $j \gets -1$
+            \ForAll {$Q_i \in U$}
+                \State $transform(mm, i, j, l_i, r_i)$
+                \State $i \gets l_i$
+                \State $j \gets r_i$
+                \State $modes[i] \gets mm.query()$
+            \EndFor
+            \State \Return modes
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+Załóżmy, że chcemy odpowiedzieć na zbiór zapytań $Q=\{Q_1, Q_2, \dots, Q_q\}$ o dominanty tablicy $A$. Oznaczmy przez $A[l_i:r_i]$ przedział o jaki pyta zapytanie $Q_i$. Niestety nie możemy wywołać \textsc{transform} po kolei dla zapytań $Q_1, Q_2, \dots, Q_q$. Ponieważ pesymistycznie złożoność czasowa będzie $\Oh(qn\log n)$. Aby temu zaradzić posortujemy zapytania w odpowiedni sposób. Dzielimy zbiór zapytań $Q$ na $s=\cl{\sqrt{q}}$ rozłącznych części. Niech $P_i$ oznazna $i$-tą część, $i \in \{1,2,\dots,s\}$. Definiujemy $P_i$ jako $\{Q_k\ |\ \cl{l_ks / n}=i\}$. Innymi słowy do $P_i$ należą zapytania $Q_k$ których lewy koniec $l_k$ leży w przedziale $((i-1)n/s, in/s]$. Oznaczamy przez $p_k$ numer części do której należy zapytanie $Q_k$ ($Q_k \in P_{p_k}$). Niech $U$ to ciąg zapytań z zbioru $Q$ uporządkowany leksykograficznie po parze ($p_i$, $r_i$), równoważnie możemy zdefiniować porządek $Q_i < Q_j \Longleftrightarrow p_i < p_j \lor (p_i = p_j \land r_i < r_j)$.
+
+\subsection{Analiza złożoności czasowej}
+\paragraph{Inicjalizacje zmiennych}
+Ciąg $U$ otrzymujemy przez uporządkowanie zbioru $Q$. Tworzymy ten ciąg za pomocą algorytmu sortowania przez scalanie, co zajmie $\Oh(q \log q)$ czasu.
+\paragraph{Pętla w linijce 7}
+Zauważmy, że wszystkie zapytania należące do części $P_k$ dla pewnego $k$ tworzą spójny fragment ciągu $U$. Dlatego podzielimy analizę na dwa przypadki. Pierwszy, ile zajmuje czasu przetworzenie zapytań w jednej części $P_k$, oraz drugi ile czasu zajmuje przejście z jednej części do drugiej.
+
+\paragraph{Pierwszy przypadek}
+Gdy zapytania $Q_i$ oraz $Q_{i+1}$ nalezą do tej samej części $P_k$ wiemy, że ich lewe końce są oddalone od siebie o maksymalnie $n/s$ z definicji części. Zatem funkcja \textsc{transform} w linijce 8 użyje co najwyżej $n/s$ operacji \textsc{insert} lub \textsc{remove} do przesunięcia lewego końca. Łącznie dla ustalonej części $P_k$ przesuwanie lewych końców zajmie $\Oh(|P_k|n/s \log n)$ czasu. Z drugiej strony wiemy, że prawe końce wszystkich zapytań w $P_k$ będą obsługiwane  w niemalejące kolejności. Zatem łącznie funkcja \textsc{transform} wywoła co najwyżej $\Oh(n)$ operacji \textsc{insert} dla ustalonego $P_k$. Zatem czas spędzony w przypadku pierwszym możemy oszacować przez $\Oh(\sum_{k=1}^{s}[|P_k|n/s \log n + n \log n]) = \Oh(qn/s \log n + ns \log n) = \Oh((q/s+s)n \log n)$
+\paragraph{Drugi przypadek}
+W tym przypadku szacujemy, że funkcja \textsc{transform} nie przesunie końców przedziału $A[i:j]$, o więcej niż $2n$. Ponieważ zapytania z dowolnej ustalonej części $P_k$ są spójnym fragmentem w ciągu $U$, zapytania $Q_i$ oraz $Q_{i+1}$ będą w różnych częściach co najwyżej $s-1$ razy. Łącznie w przypadku drugim możemy oszacować czas przez $\Oh(sn\log n)$.
+\paragraph{Podsumowanie}
+Łącząc wszystkie powyższe czasy dostajemy ograniczenie $\Oh(q \log q + (q/s+s+1)n \log n)$. Podstawiając $s=\cl{\sqrt{q}}$ otrzymujemy $\Oh(q \log q + n\sqrt{q}\log n) \subset \Oh(n\sqrt{q} \log n)$. Zamortyzowany czas dla jednego zapytania zajmuje $\Oh(n/\sqrt{q} \log n)$ czasu. Używając alternatywnej implementacji \textsc{MultiModeList} z czasu złożoności znika nam czynnik $\log n$ przez co łączny czas dla tej wersji wynosi $\Oh(q\log q + n\sqrt{q})$ oraz amortyzowany czas dla pojedynczego zapytania wynosi $\Oh(\log q + n / \sqrt{q})$.
+
+\subsection{Analiza złożoności pamięciowej}
+Struktura \textsc{MultiModeBST} zajmuje co najwyżej $\Oh(\dt)$ pamięci. Ciąg zapytań $U$ zajmuje $\Oh(q)$ pamięci, oraz jego obliczenie wymaga użycia algorytmu sortowania, który też używa $\Oh(q)$ pamięci. Potrzebujemy tablicy $modes$, aby zapisać dominanty co zajmuje $\Oh(q)$ pamięci. Funkcja \textsc{trasform} używa łącznie $\Oh(1)$ pamięci wliczając to wywoływane operacje \textsc{insert} oraz \textsc{remove}. Łącznie zużywamy $\Oh(q)$ pamięci. Alternatywna implementacja \textsc{MultiModeLIST} utrzymuje tablicę o rozmiarze $n$, używając tej wesji łącznie zużywamy $\Oh(n+q)$ pamięci.
+
+\subsection{Implementacja}
+Jako hash-mapy użyliśmy \lstinline{unordered_map} z standardowej bilbioteki c++ oraz użyliśmy \lstinline{set} jako binarnego drzewa wyszukiwań, również z standardowej biblioteki c++. Ponadto liczbę $s$ zaokrąglamy do najbliższej potęgi dwójki. Pozwala to nam na szybkie obliczenie do której części należy zapytanie, co znacząco przyśpiesza posortowanie zbioru zapytań $Q$.
+\newpage

@@ -1,0 +1,44 @@
+\section{Algorytm naiwny}
+\label{sec:naive}
+Pierwszym i zarazem najprostszym algorytmem jaki opiszemy jest algorytm naiwny w dwóch wariantach. Pierwszy wariant nie będzie wymagał aby tablica wejściowa była rank-space-zredukowana zredukowana, w przeciwieństwie do drugiego.
+\subsection{Wariant pierwszy}
+\subsubsection{Konstrukcja}
+Algorytm naiwny nie wymaga żadnego przetwarzania wstępnego.
+\subsubsection{Algorytm zapytania}
+\begin{algorithm}
+    \caption{Algorytm \textsc{naiwny}}
+    \label{alg:naive-qry}
+    \begin{algorithmic}[1]
+        \Function{NaiveQuery}{$i$,$j$}
+            \State count $\gets$ HashMap()
+            \State mfreq $\gets 0$
+            \State mvalue $\gets 0$
+            \For{$k \gets i,\dots,j$}
+                \State freq $\gets 1$
+                \If{count.contains($A[k]$)}
+                    \State freq $\gets $count.get($A[k]$)$ + 1 $
+                \EndIf
+                \State count[$A[k]$] $\gets freq$
+                \If{freq > mfreq}
+                    \State mfreq $\gets$ freq
+                    \State mvalue $\gets A[k]$
+                \EndIf
+            \EndFor
+            \Return mfreq, mvalue
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+Dla danego zapytania o dominantę na przedziale $A[i:j]$ będziemy używać hash-mapy do zliczania częstotliwości jego elementów. Przeglądamy każdy element $A[k]$ dla $k \in \{i, i+1, \dots, j\}$. Gdy elementu $A[k]$ nie ma w hash-mapie dodajemy go do niej z wartością 1, a w przeciwnym przypadku zwiększamy wartość elementu w hash-mapie o 1.
+Podczas iteracji przechowujemy maksymalną wartość zawartą w hash-mapie oraz odpowiadający jej klucz. Po przejrzeniu wszystkich elementów hash-mapa będzie zawierała częstotliwości wszystkich wartości na przedziale $A[i:j]$. Zatem zapisane maksimum to jest częstotliwość dominanty, a odpowiadający klucz to dominanta na na tym przedziale.
+\subsubsection{Analiza złożoności pamięciowej}
+Dla zapytania o dominantę na przedziale $A[i:j]$ elementów w hash-mapie jest maksymalnie $j-i+1$. Z drugiej strony elementów w hash-mapie nigdy nie będzie więcej niż $\dt$. Zatem łącznie algorytm zapytania zużywa $\Oh(\min(j-i, \dt))$ pamięci.
+\subsubsection{Analiza złożoności czasowej}
+Podczas pojedynczej iteracji pętli używamy $\Oh(1)$ operacji na hash-mapie, oraz $\Oh(1)$  operacji arytmetycznych. Iteracji pętli jest $j-i+1$. Zakładając, że wszystkie operacje na hash-mapie trwają zamortyzowany czas $\Oh(1)$. Cały algorytm zajmuje $\Oh(j-i)$ czasu.
+\subsubsection{Implementacja}
+Używamy \lstinline{unordered_map} z standardowej biblioteki C++ jako hash-mapy w tym wariancie algorytmu.
+\subsection{Wariant drugi}
+Zauważamy, że w praktyce operacje na hash-mapie, mimo że teoretycznie w amortyzowanym czasie stałym, są wolniejsze niż operacje na tablicy. Zakładając że tablica wejściowa jest rank-space-zredukowana, możemy zastąpić hash-mapę tablicą o rozmiarze $\dt$.
+\subsubsection{Algorytm zapytania}
+Algorytm zapytania wygląda prawie identycznie jak w wariancie pierwszym. Zastępujemy hash-mapę $count$ przez tablicę o rozmiarze $\dt$. Ponadto na samym końcu algorytmu przed zwróceniem dominanty zerujemy elementy tablicy $count[A[k]]$ dla $k \in \{i, i+1, \dots, j\}$. Złożoność czasowa algorytmu jest taka sama jak w wariancie pierwszym.
+\subsubsection{Analiza złożoności pamięciowej}
+W tym wariancie count zawsze zajmuje $\Oh(\dt)$ pamięci, zatem cała struktura danych łącznie zużywa $O(\dt)$ pamięci.

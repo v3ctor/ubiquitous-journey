@@ -1,0 +1,20 @@
+\section{\large Struktura danych \textsc{CDLMW BP + SF}}
+\label{sec:cdlmw-bp-sf}
+Struktura ta (końcowy algorytm z pracy \cite{chan14}) to połączenie struktury \textsc{CDLMW BP} oraz \textsc{CDLMW SF}. Struktura \textsc{CDLMW BP} zakłada, że dominanta nie może być duża, a \textsc{CDLMW SF} działa szybko kiedy liczba unikalnych elementów jest ograniczona. Metody te idealnie się dopełniają pozwalając ominąć ograniczenia obu struktur. Łączona struktura wspiera jedną operacje -- $\textsc{query}(i,j)$ -- zwracającą dominantę $A[i:j]$, w czasie $\Oh(\sqrt{n/w})$.
+
+\subsection{Konstrukcja}
+Dzielimy tablicę $A[1:n]$ na dwie, mniejsze, tablice $A_1[1:n']$ oraz $A_2[1:n-n']$. Do tablicy $A_1$ należą elementy tablicy $A$ o częstotliwości co najwyżej $\sqrt{nw}$, a do tablicy $A_2$ pozostałe elementy. Relatywny porządek w tablicach $A_1$, $A_2$ jest taki sam jak w tablicy $A$. Tworzymy $A_1, A_2$ obliczając częstotliwości wszystkich elementów używając tymczasowej tablicy o rozmiarze $\dt$ i dzieląc tablicę $A$ za niej pomocą. Konstruujemy strukturę CDLMW BP$(\sqrt{nw})$ dla tablicy $A_1$, oraz strukturę \textsc{CDLMW SF} dla tablicy $A_2$. Dodatkowo skonstruujemy $4$ tablice $I_a[1:n], J_a[1:n]$, gdzie $a \in \{1, 2\}$. Pozwolą one na konwersję zapytania o dominantę na przedziale $A[i:j]$ na dwa podzapytania o dominanty tablic $A_a[I_a[i], J_a[j]]$. Formalnie $I_a[i]$ to indeks w tablicy $A_a$ pierwszego elementu $A$ leżącego na prawo od $A[i]$, który jest w tablicy $A_a$. Analogicznie definiujemy $J_a[j]$ jako indeks tablicy $A_a$ pierwszego elementu tablicy $A$ leżącego na lewo od $A[j]$, który jest w tablicy $A_a$.
+
+\subsection{Operacja \textsc{query}}
+Dla zapytania o dominantę $A[i:j]$ pytamy podstruktury $\textsc{CDLMW BP}$, $\textsc{CDLMW SF}$ odpowiednio o dominanty na przedziałach $A_1[I_1[i]:J_1[i]]$, $A_2[I_2[i]:J_2[i]]$ i zwracamy element o większej częstotliwości.
+
+\subsection{Analiza złożoności czasowej}
+\paragraph{Konstrukcja} Tablice $I_a, J_a$ można łatwo skonstruować przechodząc tablicę $A$ jeden raz. Podstruktury potrzebują $\Oh(n\sqrt{nw})$ oraz $\Oh(n)$ czasu na konstrukcję. Łącznie potrzebujemy $\Oh(n\sqrt{nw})$ czasu na konstrukcję.
+
+\paragraph{Operacja \textsc{query}} Zauważamy, że tablica $A_2$ ma maksymalnie $n / \sqrt{nw} = \sqrt{n/w}$ elementów. Zatem obie podstruktury potrzebują $\Oh(\sqrt{n/w})$ czasu na policzenie dominant, więc operacja \textsc{query} działa w czasie $\Oh(\sqrt{n/w})$.
+
+\subsection{Analiza złożoności pamięciowej}
+\paragraph{Konstrukcja} Obie struktury zużywają liniową pamięci, tak samo jak tablice $I_*$, $J_*$. Zatem potrzebujemy łącznie liniową pamięć.
+
+\paragraph{Operacja \textsc{query}} W operacji tej wykonujemy operacje na strukturach, gdzie każda zużywa stałą dodatkową pamięć. Zatem zużywamy $\Oh(1)$ pamięci.
+\newpage
