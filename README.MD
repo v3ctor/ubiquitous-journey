@@ -1,5 +1,5 @@
 # RMQ
-Algorithms for Range Mode Query problem.
+Algorithms for Range Mode Query problem. See main paper [here](https://github.com/v3ctor/ubiquitous-journey/blob/master/tex/thesis.pdf).
 
 ## Tested on:
 - clang++ ^10.0.0
